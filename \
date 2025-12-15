@@ -44,13 +44,12 @@ void free_array(DynamicArray *arr) {
 	printf("Memory freed.\n");
 }
 
-//TODO: always removes only last element from array
-void remove_element(DynamicArray *arr, size_t *size, int index) {
+void remove_element(DynamicArray *arr,int *size, int index) {
 	if (index < 0 || index >= *size) {
 		printf("Invalid index");
 		return;
 	}
-	for (int i = index; i < *size - 1; i++) {
+	for (int i = index, i < *size - 1; i++) {
 		arr[i] = arr[i + 1];
 	}
 	(*size)--;
@@ -68,11 +67,9 @@ int main(int argc, char** argv) { DynamicArray arr; init_arr(&arr, 2);
 		printf("%d\n", arr.data[i]);
 	}
 	printf("\n");
+	
+	remove_element(&arr, sizeof(&arr), 3);
 
-	remove_element(&arr, &arr.size, 2);
-	printf("%zu", arr.size);
-
-	printf("Array elements after remove: ");
 	for (size_t i = 0; i < arr.size; i++) {
 		printf("%d\n", arr.data[i]);
 	}
