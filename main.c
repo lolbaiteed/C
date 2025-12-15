@@ -1,84 +1,42 @@
+#include "lib.h"
+#include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct {
-	int *data;
-	size_t size;
-	size_t capacity;
-} DynamicArray;
+int main(void) {
+  DynamicArray arr;
+//FIX: need wait for user input
+  fprintf(stdout,"Insert a initial capacity of array: "); 
+  size_t initCapacity;
+  fscanf(stdin, "%ld", &initCapacity); 
 
-void init_arr(DynamicArray *arr, size_t initCapacity) {
-	arr->data = (int*)malloc(initCapacity * sizeof(int));
-	if (arr->data == NULL) {
-		perror("failed to allocate init memory");
-		exit(EXIT_FAILURE);
-	}
-	arr->size = 0;
-	arr->capacity = initCapacity;
-	printf("Array initialized with capacity %zu\n", initCapacity);
+  if (check_on_error(init_arr(&arr, initCapacity)) != EXIT_SUCCESS) {
+    return EXIT_FAILURE;
+  } else {
+    printf("Array initialized with capacity %zu\n", initCapacity);
+  }
+
+  for (int i = 10; i <= 40; i += 10) {
+    if (check_on_error(push_back(&arr, i)) != EXIT_SUCCESS) {
+      free_array(&arr);
+      return EXIT_FAILURE;
+    }
+  }
+
+  printf("Array elements: \n");
+  for (size_t i = 0; i < arr.size; i++) {
+    printf("%d\n", arr.data[i]);
+  }
+
+  if (check_on_error(remove_element(&arr, 0)) != 0) {
+    return EXIT_FAILURE;
+  }
+
+  printf("Array elements after remove: \n");
+  for (size_t i = 0; i < arr.size; i++) {
+    printf("%d \n", arr.data[i]);
+  }
+
+  free_array(&arr);
+  return EXIT_SUCCESS;
 }
-
-void push_back(DynamicArray *arr, int element) {
-	if (arr->size == arr->capacity) {
-		size_t newCapacity = arr->capacity * 2;
-		printf("Resizing array: %zu -> %zu\n", arr->capacity, newCapacity);
-
-		int *newData = (int *)realloc(arr->data, newCapacity * sizeof(int));
-		if (newData == NULL) {
-			perror("Failed to reallocate memory");
-			exit(EXIT_FAILURE);
-		}
-
-		arr->data = newData;
-		arr->capacity = newCapacity;
-	}
-
-	arr->data[arr->size++] = element;
-}
-
-void free_array(DynamicArray *arr) {
-	free(arr->data);
-	arr->data = NULL;
-	arr->size = 0;
-	arr->capacity = 0;
-	printf("Memory freed.\n");
-}
-
-//TODO: always removes only last element from array
-void remove_element(DynamicArray *arr, size_t *size, int index) {
-	if (index < 0 || index >= *size) {
-		printf("Invalid index");
-		return;
-	}
-	for (int i = index; i < *size - 1; i++) {
-		arr[i] = arr[i + 1];
-	}
-	(*size)--;
-}
-
-int main(int argc, char** argv) { DynamicArray arr; init_arr(&arr, 2);
-
-	push_back(&arr, 10);
-	push_back(&arr, 20);
-	push_back(&arr, 30);
-	push_back(&arr, 40);
-
-	printf("Array elements: ");
-	for (size_t i = 0; i < arr.size; i++) {
-		printf("%d\n", arr.data[i]);
-	}
-	printf("\n");
-
-	remove_element(&arr, &arr.size, 2);
-	printf("%zu", arr.size);
-
-	printf("Array elements after remove: ");
-	for (size_t i = 0; i < arr.size; i++) {
-		printf("%d\n", arr.data[i]);
-	}
-	printf("\n");
-
-	free_array(&arr);
-	return 0;
-}
-
