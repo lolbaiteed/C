@@ -1,7 +1,7 @@
 CC = gcc
 PROD_CFLAGS = -Wall -pedantic -O3
 DEV_CFLAGS = -Wall -pedantic -Wextra -fsanitize=address -fno-omit-frame-pointer
-SOURCE = $(wildcard *.c) 
+SOURCE = $(wildcard src/*.c src/lib/*.c src/utils/*.c)
 OUT = build/app
 
 .PHONY: clean build dev
@@ -9,7 +9,6 @@ OUT = build/app
 dev:
 	mkdir -p build
 	$(CC) $(DEV_CFLAGS) $(SOURCE) -o $(OUT)
-	clear
 	./$(OUT)
 
 build:
@@ -20,3 +19,4 @@ build:
 
 clean:
 	rm -rf build
+	clear

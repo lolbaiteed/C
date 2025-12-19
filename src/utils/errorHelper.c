@@ -1,5 +1,5 @@
-#include "utils.h"
-#include "lib.h"
+#include "errorHelper.h"
+#include "../lib/array.h"
 #include <stdio.h>
 
 int check_on_error(int returnVal) {

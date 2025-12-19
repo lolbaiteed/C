@@ -2,7 +2,7 @@
 #define UTILS_H
 
 /**
- * @brief Checks functions on error code
+ * @breif Checks functions on error code
  * @param returnVal status from passed functions
  * @return EXIT_FAILURE on error with description of error or EXIT_SUCCESS if no
  * error occured

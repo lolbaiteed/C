@@ -14,6 +14,7 @@ typedef enum {
   ARRAY_ERR_INDEX,
   ARRAY_ERR_MEMORY_ALLOC,
   ARRAY_ERR_MEMORY_REALLOC,
+  ARRAY_ERR_MEMORY_OVERFLOW,
   ARRAY_ERR_EMPTY,
 } ArrayError;
 
@@ -23,7 +24,7 @@ typedef enum {
  * @return ARRAY_ERR_EMPTY if initCapacity is 0 or above ARRAY_ERR_MEMORY_ALLOC,
  * if no memory allocated to array, ARRAY_OK on success
  */
-int init_arr(DynamicArray *arr, size_t initCapacity);
+int array_initialize(DynamicArray *arr, size_t initCapacity);
 
 /**
  * @param DynamicArray *arr - Pointer to array
@@ -31,14 +32,14 @@ int init_arr(DynamicArray *arr, size_t initCapacity);
  * @return ARRAY_ERR_MEMORY_REALLOC if memory cannot be reallocated otherwise
  * ARRAY_OK
  */
-int push_back(DynamicArray *arr, int element);
+int array_push(DynamicArray *arr, int element);
 
 /**
  * @breif This function free array from memory
  * @param DynamicArray *arr - Pointer to array
  * @return void
  */
-void free_array(DynamicArray *arr);
+void array_free(DynamicArray *arr);
 
 /**
  * @param DynamicArray *arr - Pointer to array
@@ -46,6 +47,6 @@ void free_array(DynamicArray *arr);
  * @return ARRAY_ERR_INDEX if requested index is < 0 or > than array size,
  * ARRAY_ERR_MEMORY_REALLOC if memory cannot be reallocated, otherwise ARRAY_OK
  */
-int remove_element(DynamicArray *arr, size_t index);
+int array_remove_by_index(DynamicArray *arr, size_t index);
 
 #endif // !LIB_H
