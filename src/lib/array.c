@@ -3,20 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int array_initialize(DynamicArray *arr, size_t initCapacity) {
-  arr->data = NULL;
-  arr->size = 0;
-  arr->capacity = 0;
-
-  if (initCapacity < 0) {
-    if (initCapacity > SIZE_MAX / sizeof(int)) {
-      return ARRAY_ERR_EMPTY;
-    }
-    arr->data = (int *)malloc(initCapacity * sizeof(int));
-    if (arr->data == NULL) {
-      return ARRAY_ERR_MEMORY_ALLOC;
-    }
-    arr->capacity = initCapacity;
+int array_initialize(DynamicArray *arr) {
+  arr->capacity = 2;
+  arr->data = (int *)malloc(arr->capacity * sizeof(int));
+  if (arr->data == NULL) {
+    return ARRAY_ERR_MEMORY_ALLOC;
   }
   return ARRAY_OK;
 }
@@ -57,10 +48,11 @@ int array_remove_by_index(DynamicArray *arr, size_t index) {
     arr->data[i] = arr->data[i + 1];
   }
   arr->size--;
-  
+
   if (arr->size > 0 && arr->size * 4 <= arr->capacity) {
     size_t newCapacity = arr->capacity / 2;
-    if (newCapacity < 2) newCapacity = 2;
+    if (newCapacity < 2)
+      newCapacity = 2;
     int *tmp = realloc(arr->data, newCapacity * sizeof(int));
     if (tmp != NULL) {
       arr->data = tmp;

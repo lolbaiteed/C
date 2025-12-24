@@ -24,7 +24,7 @@ typedef enum {
  * @return ARRAY_ERR_EMPTY if initCapacity is 0 or above ARRAY_ERR_MEMORY_ALLOC,
  * if no memory allocated to array, ARRAY_OK on success
  */
-int array_initialize(DynamicArray *arr, size_t initCapacity);
+int array_initialize(DynamicArray *arr);
 
 /**
  * @param DynamicArray *arr - Pointer to array

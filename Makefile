@@ -1,6 +1,6 @@
 CC = gcc
 PROD_CFLAGS = -Wall -pedantic -O3
-DEV_CFLAGS = -Wall -pedantic -Wextra -fsanitize=address -fno-omit-frame-pointer
+DEV_CFLAGS = -Wall -pedantic -Wextra -fsanitize=address -fno-omit-frame-pointer -Wconversion
 SOURCE = $(wildcard src/*.c src/lib/*.c src/utils/*.c)
 OUT = build/app
 
