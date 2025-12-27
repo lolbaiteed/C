@@ -26,9 +26,10 @@ void executor_deinit(void);
 
 Future *async_spawn(async_fn fn, void *arg);
 void *future_await(Future *fut);
+void future_destroy(Future *fut);
 
 // Optional: for advanced use (e.g., manual completion)
 // But usually not needed — tasks complete themselves
 void future_complete(Future *f, void *result);
 
-#endif // ASYNC_RUNTIME_H
+#endif // ASYNC_H

@@ -61,6 +61,8 @@ static Future *future_new(void) {
 }
 
 void *future_await(Future *f) {
+  if (!f)
+    return NULL;
   mutex_lock(&f->mutex);
   while (!atomic_load(&f->done)) {
     cond_wait(&f->cond, &f->mutex);
@@ -70,11 +72,21 @@ void *future_await(Future *f) {
 }
 
 void future_complete(Future *f, void *result) {
+  if (!f)
+    return;
   mutex_lock(&f->mutex);
   f->result = result;
   atomic_store(&f->done, true);
   cond_broadcast(&f->cond);
   mutex_unlock(&f->mutex);
+}
+
+void future_destroy(Future *f) {
+  if (!f)
+    return;
+  mutex_destroy(&f->mutex);
+  cond_destroy(&f->cond);
+  free(f);
 }
 
 // -------------------- Task & Queue --------------------
@@ -87,7 +99,7 @@ typedef struct {
 
 typedef struct {
   Task *tasks;
-  int capacity;
+  long capacity;
   int head, tail, count;
   mutex_t mutex;
   cond_t not_empty;
@@ -97,11 +109,11 @@ typedef struct {
 
 static TaskQueue queue;
 static thread_t *workers = NULL;
-static int num_workers = 0;
+static long num_workers = 0;
 
 // init queue
-static void queue_init(int capacity) {
-  queue.tasks = malloc(capacity * sizeof(Task));
+static void queue_init(long capacity) {
+  queue.tasks = malloc((size_t)capacity * sizeof(Task));
   queue.capacity = capacity;
   queue.head = queue.tail = queue.count = 0;
   mutex_init(&queue.mutex);
@@ -110,14 +122,14 @@ static void queue_init(int capacity) {
   atomic_init(&queue.deinit, false);
 }
 
-static void queue_push(Task task) {
+static bool queue_push(Task task) {
   mutex_lock(&queue.mutex);
   while (queue.count == queue.capacity && !atomic_load(&queue.deinit)) {
     cond_wait(&queue.not_full, &queue.mutex);
   }
   if (atomic_load(&queue.deinit)) {
     mutex_unlock(&queue.mutex);
-    return;
+    return false;
   }
   // place at tail, then advance tail
   queue.tasks[queue.tail] = task;
@@ -125,6 +137,7 @@ static void queue_push(Task task) {
   queue.count++;
   cond_signal(&queue.not_empty);
   mutex_unlock(&queue.mutex);
+  return true;
 }
 
 static bool queue_pop(Task *task) {
@@ -161,7 +174,8 @@ static THREAD_RETURN worker_thread(void *arg) {
 }
 
 // -------------------- Public API --------------------
-void executor_init(int n_threads) {
+void executor_init(int n_threads_arg) {
+  long n_threads = n_threads_arg;
   if (n_threads <= 0) {
 #ifdef _WIN32
     SYSTEM_INFO sysinfo;
@@ -174,14 +188,14 @@ void executor_init(int n_threads) {
       n_threads = 4;
   }
   num_workers = n_threads;
-  workers = malloc(n_threads * sizeof(thread_t));
+  workers = malloc((size_t)num_workers * sizeof(thread_t));
   if (!workers) {
     fprintf(stderr, "failed to allocate workers\n");
     return;
   }
   queue_init(128);
 
-  for (int i = 0; i < n_threads; i++) {
+  for (long i = 0; i < num_workers; i++) {
     thread_create(&workers[i], NULL, worker_thread, NULL);
   }
 }
@@ -194,7 +208,7 @@ void executor_deinit(void) {
   cond_broadcast(&queue.not_full);
   mutex_unlock(&queue.mutex);
 
-  for (int i = 0; i < num_workers; i++) {
+  for (long i = 0; i < num_workers; i++) {
     thread_join(workers[i], NULL);
   }
 
@@ -205,7 +219,7 @@ void executor_deinit(void) {
     free(queue.tasks);
     queue.tasks = NULL;
   }
-  // Note: not destroying mutex/conds for simplicity, but you can add
+  // Destroy queue synchronization primitives
   mutex_destroy(&queue.mutex);
   cond_destroy(&queue.not_empty);
   cond_destroy(&queue.not_full);
@@ -217,6 +231,9 @@ Future *async_spawn(async_fn fn, void *arg) {
     return NULL;
 
   Task task = {.fn = fn, .arg = arg, .future = fut};
-  queue_push(task);
+  if (!queue_push(task)) {
+    future_destroy(fut);
+    return NULL;
+  }
   return fut;
 }
