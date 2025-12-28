@@ -89,6 +89,23 @@ void future_destroy(Future *f) {
   free(f);
 }
 
+// -------------------- Promise Implementation --------------------
+
+Promise *promise_create(Future *f) {
+  Promise *p = malloc(sizeof(Promise));
+  if (!p) return NULL;
+  p->future = f;
+  return p;
+}
+
+void *promise_await_consume(Promise *p) {
+  if (!p) return NULL;
+  void *res = future_await(p->future);
+  future_destroy(p->future);
+  free(p);
+  return res;
+}
+
 // -------------------- Task & Queue --------------------
 
 typedef struct {
