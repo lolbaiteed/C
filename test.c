@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 // Async function returning a long
-ASYNC(long, compute_fib, void*, arg) {
+async(long, compute_fib, void*, arg) {
   long n = (intptr_t)arg;
   if (n <= 1) return promise(n);
   
@@ -21,21 +21,20 @@ ASYNC(long, compute_fib, void*, arg) {
 }
 
 // Async function returning a string (char*)
-ASYNC(char*, get_greeting, void*, arg) {
+async(char*, get_greeting, void*, arg) {
     (void)arg;
     return promise("Hello from Async World!"); 
 }
 
 // Async function returning void (essentially)
-ASYNC(void, print_msg, void*, arg) {
+async(void, print_msg, void*, arg) {
     printf(">> Task: %s\n", (char*)arg);
     return promise(NULL);
 }
 
-int main(void)
-{
+int main(void) {
   printf("Staring async runtime...\n");
-  executor_init(8);
+  executor_init(0);
 
   // 1. Long Return - No cast needed
   printf("\n--- Test 1: Long ---\n");

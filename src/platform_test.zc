@@ -1,0 +1,22 @@
+#include <stdio.h>
+
+void print_platform_info() {
+    printf("Running on: ");
+
+    @windows {
+        printf("Windows\n");
+    }
+
+    @linux {
+        printf("Linux\n");
+    }
+    
+    @android {
+        printf("Android\n");
+    }
+
+    @macos {
+        printf("MacOS\n");
+    }
+}
+

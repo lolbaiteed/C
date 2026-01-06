@@ -40,7 +40,7 @@ Promise *promise_create(Future *f);
 void *promise_await_consume(Promise *p);
 
 // Macro for async function definition
-#define ASYNC(ReturnType, FuncName, ArgType, ArgName) \
+#define async(ReturnType, FuncName, ArgType, ArgName) \
     void* FuncName##_task(ArgType ArgName); \
     Promise *FuncName(ArgType ArgName) { \
         Future *f = async_spawn((async_fn)FuncName##_task, (void*)(intptr_t)ArgName); \
